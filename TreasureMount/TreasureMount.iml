@@ -79,9 +79,9 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 20 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="osmdroid-android-4.2" level="project" />
-    <orderEntry type="library" name="osmdroid-packager-4.2" level="project" />
-    <orderEntry type="library" name="osmdroid-third-party-4.2" level="project" />
+    <orderEntry type="library" exported="" name="osmdroid-third-party-4.2" level="project" />
+    <orderEntry type="library" exported="" name="osmdroid-packager-4.2" level="project" />
+    <orderEntry type="library" exported="" name="osmdroid-android-4.2" level="project" />
   </component>
 </module>
 

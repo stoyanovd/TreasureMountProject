@@ -1,67 +1,76 @@
 package ru.stilsoft.treasuremount.model;
 
-import java.util.UUID;
-
 /**
  * Created  by dima  on 01.11.14.
  */
 public class Location {
 
-	public static final int
-			LOCATION_STATE_NEW = 0,
-			LOCATION_STATE_OPEN = 1,
-			LOCATION_STATE_FINISHED = 2;
+    public static final int
+            LOCATION_STATE_NEW = 0,
+            LOCATION_STATE_OPEN = 1,
+            LOCATION_STATE_FINISHED = 2;
 
-	private Long id;
+    private Long id;
 
-	private double latitude;
+    private double latitude;
 
-	private double longitude;
+    private double longitude;
 
-	private double altitude;
+    private double altitude;
 
-	private int state = LOCATION_STATE_NEW;
+    private int state = LOCATION_STATE_NEW;
 
-	public Location() {
-	}
+    private long lastChangedTime;
 
-	public Long getId() {
-		return id;
-	}
+    public Location() {
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public double getLatitude() {
-		return latitude;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
+    public double getLatitude() {
+        return latitude;
+    }
 
-	public double getLongitude() {
-		return longitude;
-	}
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
+    public double getLongitude() {
+        return longitude;
+    }
 
-	public double getAltitude() {
-		return altitude;
-	}
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
-	public void setAltitude(double altitude) {
-		this.altitude = altitude;
-	}
+    public double getAltitude() {
+        return altitude;
+    }
 
-	public int getState() {
-		return state;
-	}
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
+    }
 
-	public void setState(int state) {
-		this.state = state;
-	}
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+
+
+    public long getLastChangedTime() {
+        return lastChangedTime;
+    }
+
+    public void setLastChangedTime(long lastChangedTime) {
+        this.lastChangedTime = lastChangedTime;
+    }
 }
