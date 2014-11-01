@@ -1,6 +1,7 @@
 package ru.stilsoft.treasuremount;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +19,7 @@ public class MainActivity extends Activity {
 		btnMap.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-
+				startActivity(new Intent(MainActivity.this, MapActivity.class));
 			}
 		});
     }
