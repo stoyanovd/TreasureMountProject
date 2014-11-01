@@ -14,6 +14,8 @@ public class Treasure extends Location {
 
 	private int type;
 
+	private Long treasureId;
+
 	public Treasure() {
 	}
 
@@ -31,5 +33,13 @@ public class Treasure extends Location {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public Long getTreasureId() {
+		return treasureId;
+	}
+
+	public void setTreasureId(Long treasureId) {
+		this.treasureId = treasureId;
 	}
 }
