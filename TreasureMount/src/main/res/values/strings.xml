@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Treasure Mount</string>
+    <string name="title_activity_map">MapActivity</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="text_map">Карта</string>
+
+</resources>
