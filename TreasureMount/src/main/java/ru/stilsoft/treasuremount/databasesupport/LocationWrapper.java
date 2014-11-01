@@ -25,9 +25,9 @@ public class LocationWrapper {
         Location location = new Location();
 
         location.setId(contentValues.getAsLong(TreasureDatabaseHelper.column_id));
-        location.setLatitude(contentValues.getAsLong(TreasureDatabaseHelper.column_latitude));
-        location.setLongitude(contentValues.getAsLong(TreasureDatabaseHelper.column_longitude));
-        location.setAltitude(contentValues.getAsLong(TreasureDatabaseHelper.column_altitude));
+        location.setLatitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_latitude));
+        location.setLongitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_longitude));
+        location.setAltitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_altitude));
         location.setState((int) (long) (contentValues.getAsLong(TreasureDatabaseHelper.column_state)));
         location.setLastChangedTime(contentValues.getAsLong(TreasureDatabaseHelper.column_lastChangedTime));
 

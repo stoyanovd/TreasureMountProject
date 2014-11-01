@@ -31,4 +31,6 @@
 
     <string name="compass">Compass</string>
 
+    <string name="xml_file_not_found_exception">File with start locations not found.</string>
+
 </resources>

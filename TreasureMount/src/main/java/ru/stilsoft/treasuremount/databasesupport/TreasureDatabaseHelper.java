@@ -31,9 +31,9 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TABLE_TREASURES_CREATE = "create table " + TABLE_NAME_LOCATIONS + "( " +
             column_id + "integer primary key, " +
-            column_latitude + "integer, " +
-            column_longitude + "integer, " +
-            column_altitude + "integer, " +
+            column_latitude + "double, " +
+            column_longitude + "double, " +
+            column_altitude + "double, " +
             column_state + "integer, " +
             column_lastChangedTime + "integer, " +
 
@@ -43,9 +43,9 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TABLE_LOCATIONS_CREATE = "create table " + TABLE_NAME_LOCATIONS + "( " +
             column_id + "integer primary key, " +
-            column_latitude + "integer, " +
-            column_longitude + "integer, " +
-            column_altitude + "integer, " +
+            column_latitude + "double, " +
+            column_longitude + "double, " +
+            column_altitude + "double, " +
             column_state + "integer, " +
             column_lastChangedTime + "integer);";
 

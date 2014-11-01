@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
 
 public class MainActivity extends Activity {
 
@@ -21,4 +22,19 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        DatabaseInitializer.initializeDatabases(getApplicationContext());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        DatabaseInitializer.closeDatabases();
+    }
+
 }

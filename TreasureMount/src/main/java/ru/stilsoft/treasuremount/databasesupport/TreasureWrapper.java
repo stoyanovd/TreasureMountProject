@@ -30,9 +30,9 @@ public class TreasureWrapper {
         Treasure treasure = new Treasure();
 
         treasure.setId(contentValues.getAsLong(TreasureDatabaseHelper.column_id));
-        treasure.setLatitude(contentValues.getAsLong(TreasureDatabaseHelper.column_latitude));
-        treasure.setLongitude(contentValues.getAsLong(TreasureDatabaseHelper.column_longitude));
-        treasure.setAltitude(contentValues.getAsLong(TreasureDatabaseHelper.column_altitude));
+        treasure.setLatitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_latitude));
+        treasure.setLongitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_longitude));
+        treasure.setAltitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_altitude));
         treasure.setState((int) (long) (contentValues.getAsLong(TreasureDatabaseHelper.column_state)));
         treasure.setLastChangedTime(contentValues.getAsLong(TreasureDatabaseHelper.column_lastChangedTime));
 
