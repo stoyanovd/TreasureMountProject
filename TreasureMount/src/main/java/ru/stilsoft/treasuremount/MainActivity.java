@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
 		btnMap.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+
 			}
 		});
     }
