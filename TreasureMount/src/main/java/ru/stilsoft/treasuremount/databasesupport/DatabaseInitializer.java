@@ -84,7 +84,7 @@ public class DatabaseInitializer {
 			location.setState(Location.LOCATION_STATE_NEW);
 			location.setAltitude(0.0);
 
-			long rowid = sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
+			sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
 					LocationWrapper.getContentValues(location));
 
 			for (int j = 0; j < TreasureGenerator.NUMBER_OF_NEAREST_TREASURES_ON_LOCATION; j++) {

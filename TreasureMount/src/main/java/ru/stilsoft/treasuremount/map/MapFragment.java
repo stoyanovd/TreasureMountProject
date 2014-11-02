@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Environment;
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.modules.IArchiveFile;
 import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
@@ -13,6 +14,7 @@ import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -78,6 +80,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	private ScaleBarOverlay mScaleBarOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     private ResourceProxy mResourceProxy;
+    private IMapController mMapController;
 
     private List<Location> mLocations = new ArrayList<>();
     private List<Treasure> mTreasures = new ArrayList<>();
@@ -146,10 +149,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
         mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
+        mMapController = mMapView.getController();
+
         this.mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context),
                 mMapView);
         this.mLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context), mMapView);
-        this.mLocationOverlay.setDrawAccuracyEnabled(true);
 
         //mMinimapOverlay = new MinimapOverlay(context, mMapView.getTileRequestCompleteHandler());
 		//mMinimapOverlay.setWidth(dm.widthPixels / 5);
@@ -176,31 +180,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		mLocationOverlay.enableMyLocation();
 		mCompassOverlay.enableCompass();
 
-
         for (Location location : mLocations) {
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
 
 
         setHasOptionsMenu(true);
-    }
-
-	@Override
-	public void onPause()
-    {
-        final SharedPreferences.Editor edit = mPrefs.edit();
-        edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
-        edit.putInt(PREFS_SCROLL_X, mMapView.getScrollX());
-        edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
-        edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
-        edit.putBoolean(PREFS_SHOW_LOCATION, mLocationOverlay.isMyLocationEnabled());
-        edit.putBoolean(PREFS_SHOW_COMPASS, mCompassOverlay.isCompassEnabled());
-        edit.commit();
-
-        this.mLocationOverlay.disableMyLocation();
-        this.mCompassOverlay.disableCompass();
-
-        super.onPause();
     }
 
     @Override
@@ -219,11 +204,31 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         */
 
         if (mPrefs.getBoolean(PREFS_SHOW_LOCATION, false)) {
-			this.mLocationOverlay.enableMyLocation();
+            this.mLocationOverlay.enableMyLocation();
+            this.mLocationOverlay.enableFollowLocation();
         }
         if (mPrefs.getBoolean(PREFS_SHOW_COMPASS, false)) {
-			this.mCompassOverlay.enableCompass();
+            this.mCompassOverlay.enableCompass();
         }
+    }
+
+	@Override
+	public void onPause()
+    {
+        final SharedPreferences.Editor edit = mPrefs.edit();
+        edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
+        edit.putInt(PREFS_SCROLL_X, mMapView.getScrollX());
+        edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
+        edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
+        edit.putBoolean(PREFS_SHOW_LOCATION, mLocationOverlay.isMyLocationEnabled());
+        edit.putBoolean(PREFS_SHOW_COMPASS, mCompassOverlay.isCompassEnabled());
+        edit.commit();
+
+        this.mLocationOverlay.disableMyLocation();
+        this.mLocationOverlay.disableFollowLocation();
+        this.mCompassOverlay.disableCompass();
+
+        super.onPause();
     }
 
     /*

@@ -2,8 +2,9 @@
 <resources>
 
     <string name="app_name">Treasure Mount</string>
-    <string name="title_activity_map">MapActivity</string>
-    <string name="action_settings">Settings</string>
+    <string name="title_activity_map">Карта</string>
+    <string name="action_settings">Настройки</string>
+    <string name="action_clean_config">Очистить конфигурацию</string>
 
     <string name="text_map">Карта</string>
 
