@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -100,7 +101,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     protected Drawable mTreasureEyeDraw;
     protected Drawable mTreasureTimeDraw;
 
-    protected ScheduledExecutorService executorService;
+    protected ScheduledExecutorService mExecutorService;
+    protected Future mCheckMyLocationFuture;
 
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
@@ -263,20 +265,30 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
             this.mCompassOverlay.enableCompass();
         }
 
-        executorService = Executors.newSingleThreadScheduledExecutor();
+        mExecutorService = Executors.newSingleThreadScheduledExecutor();
+        mCheckMyLocationFuture = mExecutorService.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                GeoPoint myLocation = mLocationOverlay.getMyLocation();
+                if (myLocation != null) {
+
+                }
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
 	@Override
 	public void onPause() {
-        executorService.shutdown();
+        mCheckMyLocationFuture.cancel(true);
+        mExecutorService.shutdown();
         try {
-            if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
-                if (!executorService.awaitTermination(3, TimeUnit.SECONDS))
+            if (!mExecutorService.awaitTermination(3, TimeUnit.SECONDS)) {
+                mExecutorService.shutdownNow();
+                if (!mExecutorService.awaitTermination(3, TimeUnit.SECONDS))
                     System.err.println("Pool did not terminate");
             }
         } catch (InterruptedException ie) {
-            executorService.shutdownNow();
+            mExecutorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
 
