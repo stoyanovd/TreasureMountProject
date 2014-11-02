@@ -3,6 +3,7 @@ package ru.stilsoft.treasuremount.map;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -38,13 +39,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import ru.stilsoft.treasuremount.R;
+import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -81,6 +85,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     private List<Location> mLocations = new ArrayList<>();
     private List<Location> mAllObjects = new ArrayList<>();
+    private Map<Location, List<Treasure>> treasureMap = new HashMap<>();
 
     ArrayList<OverlayItem> mOverlayItemArray = new ArrayList<>();
 
@@ -211,14 +216,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
         for (Location location : locations) {
             List<Treasure> treasures = DatabaseSupporter.getTreasuresByMainLocation(location);
+            treasureMap.put(location, treasures);
             mAllObjects.addAll(treasures);
         }
 
         for (Location location : mAllObjects) {
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
-
-        //ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener);
 
 
         ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<OverlayItem>(context, mOverlayItemArray, mMyOnItemGestureListener) {
@@ -272,15 +276,29 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mCheckMyLocationFuture = mExecutorService.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
+                SQLiteDatabase sqLiteDatabase = DatabaseInitializer.sqLiteDatabase;
                 boolean updateMapView = false;
                 GeoPoint myLocation = mLocationOverlay.getMyLocation();
                 if (myLocation != null) {
                     for (Location location : mLocations) {
                         if (location.getState() == Location.LOCATION_STATE_NEW && myLocation.distanceTo(location) <= LOCATION_OPEN_RADIUS) {
-                            location.setState(Location.LOCATION_STATE_OPEN);
-                            location.setLastChangedTime(System.currentTimeMillis());
-                            DatabaseSupporter.updateMainLocationInDatabase(location);
-                            updateMapView = true;
+                            try {
+                                sqLiteDatabase.beginTransaction();
+                                updateMapView = true;
+                                location.setState(Location.LOCATION_STATE_OPEN);
+                                location.setLastChangedTime(System.currentTimeMillis());
+                                DatabaseSupporter.updateMainLocationInDatabase(location);
+
+                                List<Treasure> treasures = treasureMap.get(location);
+                                for (Treasure treasure : treasures) {
+                                    treasure.setState(Treasure.LOCATION_STATE_OPEN);
+                                    DatabaseSupporter.updateTreasureInDatabase(treasure);
+                                }
+
+                                sqLiteDatabase.setTransactionSuccessful();
+                            } finally {
+                                sqLiteDatabase.endTransaction();
+                            }
                         }
                     }
 
@@ -291,9 +309,22 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                 updateMapView = false;
                 for (Location location : mLocations) {
                     if (location.getState() == Location.LOCATION_STATE_OPEN && ((System.currentTimeMillis() - location.getLastChangedTime()) / 60000) >= LOCATION_OPEN_TIMEOUT) {
-                        updateMapView = true;
-                        location.setState(Location.LOCATION_STATE_FINISHED);
-                        location.setLastChangedTime(System.currentTimeMillis());
+                        try {
+                            sqLiteDatabase.beginTransaction();
+                            updateMapView = true;
+                            location.setState(Location.LOCATION_STATE_FINISHED);
+                            location.setLastChangedTime(System.currentTimeMillis());
+
+                            List<Treasure> treasures = treasureMap.get(location);
+                            for (Treasure treasure : treasures) {
+                                treasure.setState(Treasure.LOCATION_STATE_FINISHED);
+                                DatabaseSupporter.updateTreasureInDatabase(treasure);
+                            }
+
+                            sqLiteDatabase.setTransactionSuccessful();
+                        } finally {
+                            sqLiteDatabase.endTransaction();
+                        }
                     }
                 }
 

@@ -47,8 +47,8 @@ public class DatabaseSupporter {
     }
 
     public static void updateTreasureInDatabase(Treasure treasure) {
-        DatabaseInitializer.sqLiteDatabase.update(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS,
-                LocationWrapper.getContentValues(treasure),
+        DatabaseInitializer.sqLiteDatabase.update(TreasureDatabaseHelper.TABLE_NAME_TREASURES,
+                TreasureWrapper.getContentValues(treasure),
                 TreasureDatabaseHelper.column_id + "=" + treasure.getId(), null);
     }
 }
