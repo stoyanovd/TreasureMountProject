@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import ru.stilsoft.treasuremount.model.Location;
+import ru.stilsoft.treasuremount.model.Statistics;
 import ru.stilsoft.treasuremount.model.Treasure;
 
 import java.util.ArrayList;
@@ -40,6 +41,21 @@ public class DatabaseSupporter {
         return list;
     }
 
+    public static Statistics getStatistics() {
+        Cursor cursor = DatabaseInitializer.sqLiteDatabase.query(TreasureDatabaseHelper.TABLE_NAME_STATISTICS, null,
+                null, null, null, null, null);
+
+        Statistics statistics = null;
+        while (cursor.moveToNext()) {
+            ContentValues contentValues = new ContentValues();
+            DatabaseUtils.cursorRowToContentValues(cursor, contentValues);
+            statistics = StatisticsWrapper.getStatistics(contentValues);
+        }
+        cursor.close();
+
+        return statistics;
+    }
+
     public static void updateMainLocationInDatabase(Location location) {
         DatabaseInitializer.sqLiteDatabase.update(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS,
                 LocationWrapper.getContentValues(location),
@@ -50,5 +66,11 @@ public class DatabaseSupporter {
         DatabaseInitializer.sqLiteDatabase.update(TreasureDatabaseHelper.TABLE_NAME_TREASURES,
                 TreasureWrapper.getContentValues(treasure),
                 TreasureDatabaseHelper.column_id + "=" + treasure.getId(), null);
+    }
+
+    public static void updateStatisticsInDatabase(Statistics statistics) {
+        DatabaseInitializer.sqLiteDatabase.update(TreasureDatabaseHelper.TABLE_NAME_STATISTICS,
+                StatisticsWrapper.getContentValues(statistics),
+                TreasureDatabaseHelper.column_id + "=" + statistics.getId(), null);
     }
 }

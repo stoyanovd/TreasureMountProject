@@ -8,12 +8,12 @@ import android.util.Log;
 import android.widget.Toast;
 import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.model.Location;
+import ru.stilsoft.treasuremount.model.Statistics;
 import ru.stilsoft.treasuremount.model.Treasure;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 
 /**
  * Created by fm on 01.11.14.
@@ -101,6 +101,10 @@ public class DatabaseInitializer {
 						TreasureWrapper.getContentValues(treasure));
 			}
 		}
+
+		sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_STATISTICS, null,
+				StatisticsWrapper.getContentValues(new Statistics()));
+
 		isInitialized = true;
 	}
 

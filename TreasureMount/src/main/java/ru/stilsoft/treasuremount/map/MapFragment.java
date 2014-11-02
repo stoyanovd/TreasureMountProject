@@ -42,6 +42,7 @@ import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.model.Location;
+import ru.stilsoft.treasuremount.model.Statistics;
 import ru.stilsoft.treasuremount.model.Treasure;
 
 import java.io.File;
@@ -58,6 +59,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
     public static final int LOCATION_OPEN_TIMEOUT = 1; // min
     public static final int LOCATION_OPEN_RADIUS = 50; // m
+    public static final int TREASURE_OPEN_RADIUS = 10; // m
 
     // ===========================================================
     // Constants
@@ -111,6 +113,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     protected ScheduledExecutorService mExecutorService;
     protected Future mCheckMyLocationFuture;
+
+    protected Statistics statistics;
 
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
@@ -246,6 +250,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
         mMapView.getOverlays().add(anotherItemizedIconOverlay);
 
+        statistics = DatabaseSupporter.getStatistics();
+
         setHasOptionsMenu(true);
     }
 
@@ -279,6 +285,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                 SQLiteDatabase sqLiteDatabase = DatabaseInitializer.sqLiteDatabase;
                 boolean updateMapView = false;
                 GeoPoint myLocation = mLocationOverlay.getMyLocation();
+
                 if (myLocation != null) {
                     for (Location location : mLocations) {
                         if (location.getState() == Location.LOCATION_STATE_NEW && myLocation.distanceTo(location) <= LOCATION_OPEN_RADIUS) {
@@ -291,13 +298,43 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
                                 List<Treasure> treasures = treasureMap.get(location);
                                 for (Treasure treasure : treasures) {
-                                    treasure.setState(Treasure.LOCATION_STATE_OPEN);
-                                    DatabaseSupporter.updateTreasureInDatabase(treasure);
+                                    if (treasure.getState() == Treasure.LOCATION_STATE_NEW) {
+                                        treasure.setState(Treasure.LOCATION_STATE_OPEN);
+                                        DatabaseSupporter.updateTreasureInDatabase(treasure);
+                                    }
                                 }
 
                                 sqLiteDatabase.setTransactionSuccessful();
                             } finally {
                                 sqLiteDatabase.endTransaction();
+                            }
+                        }
+
+                        if (location.getState() == Location.LOCATION_STATE_OPEN) {
+                            for (Treasure treasure : treasureMap.get(location)) {
+                                if (treasure.getState() == Location.LOCATION_STATE_OPEN && myLocation.distanceTo(treasure) <= TREASURE_OPEN_RADIUS) {
+                                    try {
+                                        sqLiteDatabase.beginTransaction();
+                                        updateMapView = true;
+                                        switch (treasure.getType()) {
+                                            case Treasure.TREASURE_TYPE_TIME:
+                                                location.setLastChangedTime(location.getLastChangedTime() + treasure.getCount() * 60000);
+                                                DatabaseSupporter.updateMainLocationInDatabase(location);
+                                                break;
+                                            case Treasure.TREASURE_TYPE_EYE:
+                                                break;
+                                            case Treasure.TREASURE_TYPE_MONEY:
+                                                statistics.setMoney(statistics.getMoney() + treasure.getCount());
+                                                DatabaseSupporter.updateStatisticsInDatabase(statistics);
+                                                break;
+                                        }
+                                        treasure.setState(Location.LOCATION_STATE_FINISHED);
+                                        DatabaseSupporter.updateTreasureInDatabase(treasure);
+                                        sqLiteDatabase.setTransactionSuccessful();
+                                    } finally {
+                                        sqLiteDatabase.endTransaction();
+                                    }
+                                }
                             }
                         }
                     }
@@ -314,6 +351,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                             updateMapView = true;
                             location.setState(Location.LOCATION_STATE_FINISHED);
                             location.setLastChangedTime(System.currentTimeMillis());
+                            DatabaseSupporter.updateMainLocationInDatabase(location);
 
                             List<Treasure> treasures = treasureMap.get(location);
                             for (Treasure treasure : treasures) {

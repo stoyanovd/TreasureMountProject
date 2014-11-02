@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
@@ -18,6 +19,9 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 		DatabaseInitializer.initializeDatabases(this.getApplicationContext());
 
 		Button btnMap = (Button) findViewById(R.id.main_button_map);
@@ -27,16 +31,6 @@ public class MainActivity extends Activity {
 				startActivity(new Intent(MainActivity.this, MapActivity.class));
 			}
 		});
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
 	}
 
 	@Override

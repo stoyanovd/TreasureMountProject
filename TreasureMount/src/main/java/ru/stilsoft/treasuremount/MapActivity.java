@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
+import android.widget.Toast;
+import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.map.MapFragment;
+import ru.stilsoft.treasuremount.model.Statistics;
 
 
 public class MapActivity extends Activity {
@@ -39,7 +41,7 @@ public class MapActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.map, menu);
+        getMenuInflater().inflate(R.menu.map, menu);
         return true;
     }
 
@@ -49,7 +51,9 @@ public class MapActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_statistics) {
+            Statistics statistics = DatabaseSupporter.getStatistics();
+            Toast.makeText(this, "Деньги: " + statistics.getMoney(), Toast.LENGTH_LONG).show();
             return true;
         }
         return super.onOptionsItemSelected(item);
