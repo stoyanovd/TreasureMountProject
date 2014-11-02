@@ -1,9 +1,11 @@
 package ru.stilsoft.treasuremount.model;
 
+import org.osmdroid.api.IGeoPoint;
+
 /**
  * Created  by dima  on 01.11.14.
  */
-public class Location {
+public class Location implements IGeoPoint {
 
     public static final int
             LOCATION_STATE_NEW = 0,
@@ -22,6 +24,10 @@ public class Location {
 
     private long lastChangedTime;
 
+    private int latitudeE6;
+
+    private int longitudeE6;
+
     public Location() {
     }
 
@@ -33,12 +39,23 @@ public class Location {
         this.id = id;
     }
 
+    @Override
+    public int getLatitudeE6() {
+        return latitudeE6;
+    }
+
+    @Override
+    public int getLongitudeE6() {
+        return longitudeE6;
+    }
+
     public double getLatitude() {
         return latitude;
     }
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+        this.latitudeE6 = (int) (latitude * 1E6);
     }
 
     public double getLongitude() {
@@ -47,6 +64,7 @@ public class Location {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+        this.longitudeE6 = (int) (longitude * 1E6);
     }
 
     public double getAltitude() {

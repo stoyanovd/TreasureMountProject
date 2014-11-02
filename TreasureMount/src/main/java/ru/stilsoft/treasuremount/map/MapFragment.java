@@ -52,6 +52,9 @@ import java.util.concurrent.TimeUnit;
 
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
+    public static final int LOCATION_OPEN_TIMEOUT = 1; // min
+    public static final int LOCATION_OPEN_RADIUS = 50; // m
+
     // ===========================================================
     // Constants
     // ===========================================================
@@ -269,10 +272,33 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mCheckMyLocationFuture = mExecutorService.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
+                boolean updateMapView = false;
                 GeoPoint myLocation = mLocationOverlay.getMyLocation();
                 if (myLocation != null) {
+                    for (Location location : mLocations) {
+                        if (location.getState() == Location.LOCATION_STATE_NEW && myLocation.distanceTo(location) <= LOCATION_OPEN_RADIUS) {
+                            location.setState(Location.LOCATION_STATE_OPEN);
+                            location.setLastChangedTime(System.currentTimeMillis());
+                            DatabaseSupporter.updateMainLocationInDatabase(location);
+                            updateMapView = true;
+                        }
+                    }
 
+                    if (updateMapView)
+                        mMapView.postInvalidate();
                 }
+
+                updateMapView = false;
+                for (Location location : mLocations) {
+                    if (location.getState() == Location.LOCATION_STATE_OPEN && ((System.currentTimeMillis() - location.getLastChangedTime()) / 60000) >= LOCATION_OPEN_TIMEOUT) {
+                        updateMapView = true;
+                        location.setState(Location.LOCATION_STATE_FINISHED);
+                        location.setLastChangedTime(System.currentTimeMillis());
+                    }
+                }
+
+                if (updateMapView)
+                    mMapView.postInvalidate();
             }
         }, 5, 5, TimeUnit.SECONDS);
     }
