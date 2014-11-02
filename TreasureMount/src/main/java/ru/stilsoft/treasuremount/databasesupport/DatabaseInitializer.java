@@ -3,13 +3,14 @@ package ru.stilsoft.treasuremount.databasesupport;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created by fm on 01.11.14.
@@ -27,6 +28,8 @@ public class DatabaseInitializer {
 			treasureDatabaseHelper = new TreasureDatabaseHelper(context);
 		}
 		sqLiteDatabase = treasureDatabaseHelper.getWritableDatabase();
+		//treasureDatabaseHelper.onlyDrop(sqLiteDatabase);
+
 		if (!isInitialized) {
 			checkInitialization();
 		}
@@ -36,8 +39,12 @@ public class DatabaseInitializer {
 	}
 
 	public static void closeDatabases() {
-		sqLiteDatabase.close();
-		treasureDatabaseHelper.close();
+		if (sqLiteDatabase != null) {
+			sqLiteDatabase.close();
+		}
+		if (treasureDatabaseHelper != null) {
+			treasureDatabaseHelper.close();
+		}
 	}
 
 	public static void checkInitialization() {
@@ -50,14 +57,26 @@ public class DatabaseInitializer {
 	}
 
 	private static void getMainLocationsAndGenerateTreasures(Context context) {
-		Double[] read = readAnXML(context);
+		//Double[] read = readAnXML(context);
+		Double[] read = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0};
+		if (read == null) {
+			Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_SHORT).show();
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		long curTime = System.currentTimeMillis();
 
 		for (int i = 0; i < NUMBER_OF_MAIN_LOCATIONS; i += 2) {
 			Location location = new Location();
-			location.setLatitude(read[i * 2]);
-			location.setLongitude(read[i * 2 + 1]);
+			location.setLatitude(read[i]);
+			location.setLongitude(read[i + 1]);
 			location.setLastChangedTime(curTime);
+			location.setId((long) i);
+			location.setState(Location.LOCATION_STATE_NEW);
+			location.setAltitude(0.0);
 
 			sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
 					LocationWrapper.getContentValues(location));
@@ -70,7 +89,7 @@ public class DatabaseInitializer {
 			}
 			for (int j = 0; j < TreasureGenerator.NUMBER_OF_FAR_TREASURES_ON_LOCATION; j++) {
 				Treasure treasure = TreasureGenerator.generateNewTreasure(location, TreasureGenerator.FAR_AVERAGE_DISTANCE,
-						2 * Math.PI * j / TreasureGenerator.NUMBER_OF_FAR_TREASURES_ON_LOCATION, j);
+						2 * Math.PI * j / TreasureGenerator.NUMBER_OF_FAR_TREASURES_ON_LOCATION, j + TreasureGenerator.NUMBER_OF_NEAREST_TREASURES_ON_LOCATION);
 				sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_TREASURES, null,
 						TreasureWrapper.getContentValues(treasure));
 			}
@@ -81,16 +100,16 @@ public class DatabaseInitializer {
 	private static Double[] readAnXML(Context context) {
 
 		try {
+			File file = new File(Environment.getExternalStorageDirectory(), "/TreasureMount/" + "main_locations.txt");
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 			FileInputStream fileInputStream = context.openFileInput("main_locations.txt");
-			byte[] bytes = new byte[1000];
 			StringBuilder text = new StringBuilder();
-			int read = 0;
-			while ((read = fileInputStream.read(bytes)) != -1) {
-				for (int i = 0; i < read; i++) {
-					if (bytes[i] > 127) {
-						throw new IOException("Error in txt with Main Locations.");
-					} else {
-						text.append((char) bytes[i]);
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				for (int i = 0; i < line.length(); i++) {
+					char c = line.charAt(i);
+					if (c == ';' || (c >= '0' && c <= '9')) {
+						text.append(c);
 					}
 				}
 			}
@@ -104,6 +123,7 @@ public class DatabaseInitializer {
 
 		} catch (IOException | NumberFormatException e) {
 			e.printStackTrace();
+			Log.e("readXML error", e.getMessage(), e);
 			Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_LONG).show();
 			return null;
 		}

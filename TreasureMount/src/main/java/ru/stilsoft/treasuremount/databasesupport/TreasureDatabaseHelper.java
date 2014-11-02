@@ -17,8 +17,8 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-    protected static final String column_id = "_ID";
-    protected static final String column_latitude = "latitude";
+	protected static final String column_id = "_id";
+	protected static final String column_latitude = "latitude";
     protected static final String column_longitude = "longitude";
     protected static final String column_altitude = "altitude";
     protected static final String column_state = "state";
@@ -29,25 +29,25 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
     protected static final String column_treasureId = "treasureId";
 
 
-    private static final String TABLE_TREASURES_CREATE = "create table " + TABLE_NAME_LOCATIONS + "( " +
-            column_id + "integer primary key, " +
-            column_latitude + "double, " +
-            column_longitude + "double, " +
-            column_altitude + "double, " +
-            column_state + "integer, " +
-            column_lastChangedTime + "integer, " +
+	private static final String TABLE_TREASURES_CREATE = "create table " + TABLE_NAME_TREASURES + "( " +
+			column_id + " integer primary key, " +
+			column_latitude + " double, " +
+			column_longitude + " double, " +
+			column_altitude + " double, " +
+			column_state + " integer, " +
+			column_lastChangedTime + " integer, " +
 
-            column_count + "integer, " +
-            column_type + "integer, " +
-            column_treasureId + "integer);";
+			column_count + " integer, " +
+			column_type + " integer, " +
+			column_treasureId + " integer);";
 
     private static final String TABLE_LOCATIONS_CREATE = "create table " + TABLE_NAME_LOCATIONS + "( " +
-            column_id + "integer primary key, " +
-            column_latitude + "double, " +
-            column_longitude + "double, " +
-            column_altitude + "double, " +
-            column_state + "integer, " +
-            column_lastChangedTime + "integer);";
+			column_id + " integer primary key, " +
+			column_latitude + " double, " +
+			column_longitude + " double, " +
+			column_altitude + " double, " +
+			column_state + " integer, " +
+			column_lastChangedTime + " integer);";
 
 
     public TreasureDatabaseHelper(Context context) {
@@ -56,8 +56,14 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(TABLE_LOCATIONS_CREATE + TABLE_TREASURES_CREATE);
-    }
+		database.execSQL(TABLE_LOCATIONS_CREATE);
+		database.execSQL(TABLE_TREASURES_CREATE);
+	}
+
+	public void onlyDrop(SQLiteDatabase database) {
+		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LOCATIONS);
+		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TREASURES);
+	}
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
