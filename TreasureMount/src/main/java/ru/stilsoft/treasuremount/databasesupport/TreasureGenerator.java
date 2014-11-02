@@ -1,5 +1,6 @@
 package ru.stilsoft.treasuremount.databasesupport;
 
+import org.osmdroid.util.GeoPoint;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
 
@@ -17,11 +18,12 @@ public class TreasureGenerator {
 
 	// Average distance between treasures in nearest circle = NEAREST_AVERAGE_DISTANCE / 2 (depends on NUMBER_OF_NEAREST_TREASURES_ON_LOCATION too)
 	//  and so on for far circle
-
-	public static final double AVERAGE_DISTANCE_ERROR = 5.0;
+	public static final double RANDOM_MOVE_IN_ANGLE = 2 * Math.PI / 180;
+	public static final double AVERAGE_DISTANCE_ERROR_METERS = 5.0;
 
 	public static final double TIME_BONUS_CHANCE = 0.15;
 	public static final double EYE_BONUS_CHANCE = 0.15;
+	public static final double MONEY_BONUS_CHANCE = 0.70;
 
 	public static final double MONEY_CHANCE_100 = 0.25;
 	public static final double MONEY_CHANCE_50 = 0.40;
@@ -31,12 +33,15 @@ public class TreasureGenerator {
 		Treasure treasure = new Treasure();
 
 		treasure.setId(location.getId() * NUMBER_OF_TREASURES_ON_LOCATION + j);
-		treasure.setLatitude(location.getLatitude() + Math.cos(angle) * distance);
-		treasure.setLongitude(location.getLongitude() + Math.sin(angle) * distance);
 
+		double randomizedAngle = angle + getRandomOffsetWithLimit(RANDOM_MOVE_IN_ANGLE);
+		double randomizedDistance = distance + getRandomOffsetWithLimit(AVERAGE_DISTANCE_ERROR_METERS);
 
-		treasure.setLatitude(treasure.getLatitude() + (Math.random() - 0.5) * 2 * AVERAGE_DISTANCE_ERROR);
-		treasure.setLongitude(treasure.getLongitude() + (Math.random() - 0.5) * 2 * AVERAGE_DISTANCE_ERROR);
+		GeoPoint locationGeoPoint = new GeoPoint(location.getLatitudeE6(), location.getLongitudeE6());
+		GeoPoint treasureGeoPoint = locationGeoPoint.destinationPoint(randomizedDistance, (float) randomizedAngle);
+
+		treasure.setLatitude(treasureGeoPoint.getLatitude());
+		treasure.setLongitude(treasureGeoPoint.getLongitude());
 
 		treasure.setAltitude(0.0);
 		treasure.setState(Treasure.LOCATION_STATE_NEW);
@@ -74,6 +79,10 @@ public class TreasureGenerator {
 			return 50;
 		}
 		return 20;
+	}
+
+	private static double getRandomOffsetWithLimit(double limit) {
+		return (Math.random() - 0.5) * 2 * limit;
 	}
 
 }

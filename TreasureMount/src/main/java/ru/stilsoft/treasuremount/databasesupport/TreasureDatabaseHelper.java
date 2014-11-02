@@ -84,7 +84,7 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
                         + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LOCATIONS);
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TREASURES);
-        database.execSQL("DROP TABLE IF EXISTS " + TABLE_STATISTICS_CREATE);
-        onCreate(database);
+		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_STATISTICS);
+		onCreate(database);
     }
 }
