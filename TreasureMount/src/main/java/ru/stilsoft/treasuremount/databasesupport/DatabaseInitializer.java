@@ -10,7 +10,10 @@ import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by fm on 01.11.14.
@@ -57,16 +60,19 @@ public class DatabaseInitializer {
 	}
 
 	private static void getMainLocationsAndGenerateTreasures(Context context) {
-		//Double[] read = readAnXML(context);
-		Double[] read = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0};
-		if (read == null) {
-			Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_SHORT).show();
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		Double[] read = readAnXML(context);
+		//Double[] read = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0};
+		for (int i = 0; i < NUMBER_OF_MAIN_LOCATIONS; i++) {
+			if (read[i] == null) {
+				Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_SHORT).show();
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+
 		long curTime = System.currentTimeMillis();
 
 		for (int i = 0; i < NUMBER_OF_MAIN_LOCATIONS; i += 2) {
@@ -102,7 +108,7 @@ public class DatabaseInitializer {
 		try {
 			File file = new File(Environment.getExternalStorageDirectory(), "/TreasureMount/" + "main_locations.txt");
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-			FileInputStream fileInputStream = context.openFileInput("main_locations.txt");
+			//FileInputStream fileInputStream = context.openFileInput("main_locations.txt");
 			StringBuilder text = new StringBuilder();
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
@@ -113,7 +119,8 @@ public class DatabaseInitializer {
 					}
 				}
 			}
-			fileInputStream.close();
+			//fileInputStream.close();
+			bufferedReader.close();
 			String[] doubles = text.toString().split(";");
 			Double[] ans = new Double[doubles.length];
 			for (int i = 0; i < doubles.length; i++) {
