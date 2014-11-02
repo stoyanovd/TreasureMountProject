@@ -170,8 +170,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         setHasOptionsMenu(true);
     }
 
-    @Override
-    public void onPause()
+	@Override
+	public void onPause()
     {
         final SharedPreferences.Editor edit = mPrefs.edit();
         edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
