@@ -31,6 +31,14 @@ public class MainActivity extends Activity {
 				startActivity(new Intent(MainActivity.this, MapActivity.class));
 			}
 		});
+
+		Button btnExit = (Button) findViewById(R.id.main_button_exit);
+		btnExit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
 	}
 
 	@Override

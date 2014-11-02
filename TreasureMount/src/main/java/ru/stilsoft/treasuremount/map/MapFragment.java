@@ -470,16 +470,16 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     public void drawObject(Treasure treasure, Canvas canvas, int x, int y) {
         switch (treasure.getType()) {
             case Treasure.TREASURE_TYPE_MONEY:
-                mLocationNewDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mLocationNewDraw.draw(canvas);
+                mTreasureMoneyDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mTreasureMoneyDraw.draw(canvas);
                 break;
             case Treasure.TREASURE_TYPE_EYE:
-                mLocationOpenDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mLocationOpenDraw.draw(canvas);
+                mTreasureEyeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mTreasureEyeDraw.draw(canvas);
                 break;
             case Treasure.TREASURE_TYPE_TIME:
-                mLocationFinishedDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mLocationFinishedDraw.draw(canvas);
+                mTreasureTimeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mTreasureTimeDraw.draw(canvas);
                 break;
         }
     }
