@@ -54,18 +54,4 @@ public class MapActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        DatabaseInitializer.initializeDatabases(getApplicationContext());
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        DatabaseInitializer.closeDatabases();
-    }
 }

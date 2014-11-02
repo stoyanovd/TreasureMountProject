@@ -3,6 +3,8 @@ package ru.stilsoft.treasuremount.map;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.graphics.Canvas;
+import android.graphics.Point;
 import android.os.Environment;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapController;
@@ -16,6 +18,7 @@ import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -39,6 +42,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import ru.stilsoft.treasuremount.R;
+import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
 import ru.stilsoft.treasuremount.samplefragments.BaseSampleFragment;
@@ -87,20 +91,30 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     ArrayList<OverlayItem> mOverlayItemArray = new ArrayList<>();
 
+    ItemizedIconOverlay.OnItemGestureListener<OverlayItem> mMyOnItemGestureListener = new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+        @Override
+        public boolean onItemSingleTapUp(int index, OverlayItem item) {
+            return false;
+        }
+
+        @Override
+        public boolean onItemLongPress(int index, OverlayItem item) {
+            return false;
+        }
+    };
+
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
 		return fragment;
 	}
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
 
 
@@ -180,9 +194,28 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		mLocationOverlay.enableMyLocation();
 		mCompassOverlay.enableCompass();
 
+        mLocations = DatabaseSupporter.getMainLocations();
+
         for (Location location : mLocations) {
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
+
+
+
+        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener); /* {
+            @Override
+            public void draw(Canvas canvas, MapView mapview, boolean arg2) {
+                for (int i = 0; i < mOverlayItemArray.size(); ++i) {
+                    GeoPoint in = mOverlayItemArray.get(i).getPoint();
+
+                    Point out = new Point();
+                    mapview.getProjection().toPixels(in, out);
+
+                    mGraphicObjects.get(i).draw(canvas, out.x - 15, out.y - 15);
+                }
+            }
+        };
+        */
 
 
         setHasOptionsMenu(true);

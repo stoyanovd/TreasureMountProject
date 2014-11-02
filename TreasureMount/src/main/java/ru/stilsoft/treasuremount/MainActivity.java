@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		DatabaseInitializer.initializeDatabases(this.getApplicationContext());
+
 		Button btnMap = (Button) findViewById(R.id.main_button_map);
 		btnMap.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -30,15 +32,17 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		DatabaseInitializer.initializeDatabases(this.getApplicationContext());
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+	}
 
+	@Override
+	protected void onDestroy() {
 		DatabaseInitializer.closeDatabases();
+		super.onDestroy();
 	}
 
 	@Override

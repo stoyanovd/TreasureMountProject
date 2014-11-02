@@ -75,7 +75,8 @@ public class DatabaseInitializer {
 
 		long curTime = System.currentTimeMillis();
 
-		for (int i = 0; i < NUMBER_OF_MAIN_LOCATIONS; i += 2) {
+		int count = NUMBER_OF_MAIN_LOCATIONS * 2;
+		for (int i = 0; i < count; i += 2) {
 			Location location = new Location();
 			location.setLatitude(read[i]);
 			location.setLongitude(read[i + 1]);

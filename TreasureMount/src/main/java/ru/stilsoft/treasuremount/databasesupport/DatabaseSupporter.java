@@ -32,7 +32,6 @@ public class DatabaseSupporter {
         List<Location> list = new ArrayList<>();
         Cursor cursor = DatabaseInitializer.sqLiteDatabase.query(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
                 null, null, null, null, null);
-        cursor.moveToFirst();
         while (cursor.moveToNext()) {
             ContentValues contentValues = new ContentValues();
             DatabaseUtils.cursorRowToContentValues(cursor, contentValues);
