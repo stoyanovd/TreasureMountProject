@@ -57,9 +57,9 @@ import java.util.concurrent.TimeUnit;
 
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
-    public static final int LOCATION_OPEN_TIMEOUT = 1; // min
-    public static final int LOCATION_OPEN_RADIUS = 50; // m
-    public static final int TREASURE_OPEN_RADIUS = 10; // m
+    public static final int LOCATION_OPEN_TIMEOUT = 15; // min
+    public static final int LOCATION_OPEN_RADIUS = 10; // m
+    public static final int TREASURE_OPEN_RADIUS = 5; // m
 
     // ===========================================================
     // Constants
