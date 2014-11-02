@@ -1,14 +1,19 @@
 package ru.stilsoft.treasuremount;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseInitializer;
 import ru.stilsoft.treasuremount.databasesupport.TreasureDatabaseHelper;
 
@@ -22,23 +27,29 @@ public class MainActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+		Button btnMap = (Button) findViewById(R.id.main_button_map);
+		Button btnExit = (Button) findViewById(R.id.main_button_exit);
+		btnMap.setEnabled(false);
+		btnExit.setEnabled(false);
+		
 		DatabaseInitializer.initializeDatabases(this.getApplicationContext());
 
-		Button btnMap = (Button) findViewById(R.id.main_button_map);
 		btnMap.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(MainActivity.this, MapActivity.class));
 			}
 		});
-
-		Button btnExit = (Button) findViewById(R.id.main_button_exit);
 		btnExit.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				finish();
 			}
 		});
+
+		btnMap.setEnabled(true);
+		btnExit.setEnabled(true);
+
 	}
 
 	@Override

@@ -244,8 +244,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
                     Location location = mAllObjects.get(i);
                     if (location instanceof Treasure && location.getState() == Location.LOCATION_STATE_OPEN) {
-                        Location mainLocation = mLocationMap.get(location.getId());
-                        drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
+						Location mainLocation = mLocationMap.get(((Treasure) location).getTreasureId());
+						drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
                     } else {
                         drawObject(location, canvas, out.x, out.y);
                     }
