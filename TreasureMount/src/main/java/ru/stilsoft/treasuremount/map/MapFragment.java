@@ -45,6 +45,9 @@ import ru.stilsoft.treasuremount.model.Treasure;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
@@ -73,6 +76,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private ResourceProxy mResourceProxy;
 
     private List<Location> mLocations = new ArrayList<>();
+    private List<Location> mAllObjects = new ArrayList<>();
 
     ArrayList<OverlayItem> mOverlayItemArray = new ArrayList<>();
 
@@ -91,6 +95,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     protected Drawable mLocationNewDraw;
     protected Drawable mLocationOpenDraw;
     protected Drawable mLocationFinishedDraw;
+
+    protected Drawable mTreasureMoneyDraw;
+    protected Drawable mTreasureEyeDraw;
+    protected Drawable mTreasureTimeDraw;
+
+    protected ScheduledExecutorService executorService;
 
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
@@ -186,10 +196,20 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mLocationOpenDraw = context.getResources().getDrawable(R.drawable.location_open);
         mLocationFinishedDraw = context.getResources().getDrawable(R.drawable.location_finished);
 
-        final List<Location> locations = DatabaseSupporter.getMainLocations();
-        mLocations.addAll(locations);
+        mTreasureMoneyDraw = context.getResources().getDrawable(R.drawable.treasure_money);
+        mTreasureEyeDraw = context.getResources().getDrawable(R.drawable.treasure_eye);
+        mTreasureTimeDraw = context.getResources().getDrawable(R.drawable.treasure_time);
 
-        for (Location location : mLocations) {
+        List<Location> locations = DatabaseSupporter.getMainLocations();
+        mLocations.addAll(locations);
+        mAllObjects.addAll(locations);
+
+        for (Location location : locations) {
+            List<Treasure> treasures = DatabaseSupporter.getTreasuresByMainLocation(location);
+            mAllObjects.addAll(treasures);
+        }
+
+        for (Location location : mAllObjects) {
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
 
@@ -205,9 +225,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                     Point out = new Point();
                     mapview.getProjection().toPixels(in, out);
 
-                    Location location = mLocations.get(i);
-                    if (location instanceof Treasure) {
-
+                    Location location = mAllObjects.get(i);
+                    if (location instanceof Treasure && location.getState() == Location.LOCATION_STATE_OPEN) {
+                        drawObject((Treasure) location, canvas, out.x, out.y);
                     } else {
                         drawObject(location, canvas, out.x, out.y);
                     }
@@ -242,11 +262,24 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         if (mPrefs.getBoolean(PREFS_SHOW_COMPASS, false)) {
             this.mCompassOverlay.enableCompass();
         }
+
+        executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
 	@Override
-	public void onPause()
-    {
+	public void onPause() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(3, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
         final SharedPreferences.Editor edit = mPrefs.edit();
         edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
         edit.putInt(PREFS_SCROLL_X, mMapView.getScrollX());
@@ -327,19 +360,36 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		return mMapView;
 	}
 
+    public void drawObject(Treasure treasure, Canvas canvas, int x, int y) {
+        switch (treasure.getType()) {
+            case Treasure.TREASURE_TYPE_MONEY:
+                mLocationNewDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mLocationNewDraw.draw(canvas);
+                break;
+            case Treasure.TREASURE_TYPE_EYE:
+                mLocationOpenDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mLocationOpenDraw.draw(canvas);
+                break;
+            case Treasure.TREASURE_TYPE_TIME:
+                mLocationFinishedDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                mLocationFinishedDraw.draw(canvas);
+                break;
+        }
+    }
+
 
     public void drawObject(Location location, Canvas canvas, int x, int y) {
         switch (location.getState()) {
             case Location.LOCATION_STATE_NEW:
-                mLocationNewDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationNewDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
                 mLocationNewDraw.draw(canvas);
                 break;
             case Location.LOCATION_STATE_OPEN:
-                mLocationOpenDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationOpenDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
                 mLocationOpenDraw.draw(canvas);
                 break;
             case Location.LOCATION_STATE_FINISHED:
-                mLocationFinishedDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationFinishedDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
                 mLocationFinishedDraw.draw(canvas);
                 break;
         }

@@ -17,8 +17,7 @@ public class DatabaseSupporter {
     public static List<Treasure> getTreasuresByMainLocation(Location location) {
         List<Treasure> list = new ArrayList<>();
         Cursor cursor = DatabaseInitializer.sqLiteDatabase.query(TreasureDatabaseHelper.TABLE_NAME_TREASURES, null,
-                TreasureDatabaseHelper.column_treasureId + "=" + location.getId(), null, null, null, null);
-        cursor.moveToFirst();
+                TreasureDatabaseHelper.column_treasureId + "=" + location.getId(), null, null, null, null);;
         while (cursor.moveToNext()) {
             ContentValues contentValues = new ContentValues();
             DatabaseUtils.cursorRowToContentValues(cursor, contentValues);
