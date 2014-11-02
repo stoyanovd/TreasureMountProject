@@ -192,6 +192,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
 
 		mLocationOverlay.enableMyLocation();
+        mLocationOverlay.setDrawAccuracyEnabled(true);
 		mCompassOverlay.enableCompass();
 
         mLocations = DatabaseSupporter.getMainLocations();
@@ -200,9 +201,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
 
+        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener);
+        mMapView.getOverlays().add(anotherItemizedIconOverlay);
 
-
-        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener); /* {
+        /*
+        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener) {
             @Override
             public void draw(Canvas canvas, MapView mapview, boolean arg2) {
                 for (int i = 0; i < mOverlayItemArray.size(); ++i) {
