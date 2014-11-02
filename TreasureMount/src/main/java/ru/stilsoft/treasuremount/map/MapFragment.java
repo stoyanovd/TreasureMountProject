@@ -5,9 +5,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.modules.IArchiveFile;
 import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
@@ -16,7 +16,6 @@ import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.MinimapOverlay;
@@ -35,30 +34,18 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.model.Location;
 import ru.stilsoft.treasuremount.model.Treasure;
-import ru.stilsoft.treasuremount.samplefragments.BaseSampleFragment;
-import ru.stilsoft.treasuremount.samplefragments.SampleFactory;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Default map view activity.
- *
- * @author Marc Kurtz
- * @author Manuel Stahl
- *
- */
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
     // ===========================================================
@@ -84,10 +71,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	private ScaleBarOverlay mScaleBarOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     private ResourceProxy mResourceProxy;
-    private IMapController mMapController;
 
     private List<Location> mLocations = new ArrayList<>();
-    private List<Treasure> mTreasures = new ArrayList<>();
 
     ArrayList<OverlayItem> mOverlayItemArray = new ArrayList<>();
 
@@ -102,6 +87,10 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
             return false;
         }
     };
+
+    protected Drawable mLocationNewDraw;
+    protected Drawable mLocationOpenDraw;
+    protected Drawable mLocationFinishedDraw;
 
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
@@ -163,8 +152,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
         mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        mMapController = mMapView.getController();
-
         this.mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context),
                 mMapView);
         this.mLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context), mMapView);
@@ -195,17 +182,21 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mLocationOverlay.setDrawAccuracyEnabled(true);
 		mCompassOverlay.enableCompass();
 
-        mLocations = DatabaseSupporter.getMainLocations();
+        mLocationNewDraw = context.getResources().getDrawable(R.drawable.location_new);
+        mLocationOpenDraw = context.getResources().getDrawable(R.drawable.location_open);
+        mLocationFinishedDraw = context.getResources().getDrawable(R.drawable.location_finished);
+
+        final List<Location> locations = DatabaseSupporter.getMainLocations();
+        mLocations.addAll(locations);
 
         for (Location location : mLocations) {
             mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
         }
 
-        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener);
-        mMapView.getOverlays().add(anotherItemizedIconOverlay);
+        //ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener);
 
-        /*
-        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<>(context, mOverlayItemArray, mMyOnItemGestureListener) {
+
+        ItemizedIconOverlay<OverlayItem> anotherItemizedIconOverlay = new ItemizedIconOverlay<OverlayItem>(context, mOverlayItemArray, mMyOnItemGestureListener) {
             @Override
             public void draw(Canvas canvas, MapView mapview, boolean arg2) {
                 for (int i = 0; i < mOverlayItemArray.size(); ++i) {
@@ -214,12 +205,17 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                     Point out = new Point();
                     mapview.getProjection().toPixels(in, out);
 
-                    mGraphicObjects.get(i).draw(canvas, out.x - 15, out.y - 15);
+                    Location location = mLocations.get(i);
+                    if (location instanceof Treasure) {
+
+                    } else {
+                        drawObject(location, canvas, out.x, out.y);
+                    }
                 }
             }
         };
-        */
 
+        mMapView.getOverlays().add(anotherItemizedIconOverlay);
 
         setHasOptionsMenu(true);
     }
@@ -331,8 +327,21 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		return mMapView;
 	}
 
-    // @Override
-    // public boolean onTrackballEvent(final MotionEvent event) {
-    // return this.mMapView.onTrackballEvent(event);
-    // }
+
+    public void drawObject(Location location, Canvas canvas, int x, int y) {
+        switch (location.getState()) {
+            case Location.LOCATION_STATE_NEW:
+                mLocationNewDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationNewDraw.draw(canvas);
+                break;
+            case Location.LOCATION_STATE_OPEN:
+                mLocationOpenDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationOpenDraw.draw(canvas);
+                break;
+            case Location.LOCATION_STATE_FINISHED:
+                mLocationFinishedDraw.setBounds(x - 18, y - 18, x + 18, y + 18);
+                mLocationFinishedDraw.draw(canvas);
+                break;
+        }
+    }
 }
