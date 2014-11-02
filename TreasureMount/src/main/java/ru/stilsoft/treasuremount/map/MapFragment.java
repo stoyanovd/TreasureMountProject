@@ -85,7 +85,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private RotationGestureOverlay mRotationGestureOverlay;
     private ResourceProxy mResourceProxy;
 
-    private List<Location> mLocations = new ArrayList<>();
+    private Map<Long, Location> mLocationMap = new HashMap<>();
     private List<Location> mAllObjects = new ArrayList<>();
     private Map<Location, List<Treasure>> treasureMap = new HashMap<>();
 
@@ -110,6 +110,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     protected Drawable mTreasureMoneyDraw;
     protected Drawable mTreasureEyeDraw;
     protected Drawable mTreasureTimeDraw;
+    protected Drawable mTreasureHideDraw;
 
     protected ScheduledExecutorService mExecutorService;
     protected Future mCheckMyLocationFuture;
@@ -213,9 +214,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mTreasureMoneyDraw = context.getResources().getDrawable(R.drawable.treasure_money);
         mTreasureEyeDraw = context.getResources().getDrawable(R.drawable.treasure_eye);
         mTreasureTimeDraw = context.getResources().getDrawable(R.drawable.treasure_time);
+        mTreasureHideDraw = context.getResources().getDrawable(R.drawable.treasure_hide);
 
         List<Location> locations = DatabaseSupporter.getMainLocations();
-        mLocations.addAll(locations);
+        for (Location location : locations) {
+            mLocationMap.put(location.getId(), location);
+        }
         mAllObjects.addAll(locations);
 
         for (Location location : locations) {
@@ -240,7 +244,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
                     Location location = mAllObjects.get(i);
                     if (location instanceof Treasure && location.getState() == Location.LOCATION_STATE_OPEN) {
-                        drawObject((Treasure) location, canvas, out.x, out.y);
+                        Location mainLocation = mLocationMap.get(location.getId());
+                        drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
                     } else {
                         drawObject(location, canvas, out.x, out.y);
                     }
@@ -287,7 +292,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                 GeoPoint myLocation = mLocationOverlay.getMyLocation();
 
                 if (myLocation != null) {
-                    for (Location location : mLocations) {
+                    for (Location location : mLocationMap.values()) {
                         if (location.getState() == Location.LOCATION_STATE_NEW && myLocation.distanceTo(location) <= LOCATION_OPEN_RADIUS) {
                             try {
                                 sqLiteDatabase.beginTransaction();
@@ -322,6 +327,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                                                 DatabaseSupporter.updateMainLocationInDatabase(location);
                                                 break;
                                             case Treasure.TREASURE_TYPE_EYE:
+                                                location.setShowTreasure(true);
+                                                DatabaseSupporter.updateMainLocationInDatabase(location);
                                                 break;
                                             case Treasure.TREASURE_TYPE_MONEY:
                                                 statistics.setMoney(statistics.getMoney() + treasure.getCount());
@@ -344,7 +351,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                 }
 
                 updateMapView = false;
-                for (Location location : mLocations) {
+                for (Location location : mLocationMap.values()) {
                     if (location.getState() == Location.LOCATION_STATE_OPEN && ((System.currentTimeMillis() - location.getLastChangedTime()) / 60000) >= LOCATION_OPEN_TIMEOUT) {
                         try {
                             sqLiteDatabase.beginTransaction();
@@ -467,20 +474,25 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		return mMapView;
 	}
 
-    public void drawObject(Treasure treasure, Canvas canvas, int x, int y) {
-        switch (treasure.getType()) {
-            case Treasure.TREASURE_TYPE_MONEY:
-                mTreasureMoneyDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mTreasureMoneyDraw.draw(canvas);
-                break;
-            case Treasure.TREASURE_TYPE_EYE:
-                mTreasureEyeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mTreasureEyeDraw.draw(canvas);
-                break;
-            case Treasure.TREASURE_TYPE_TIME:
-                mTreasureTimeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
-                mTreasureTimeDraw.draw(canvas);
-                break;
+    public void drawObject(Treasure treasure, Canvas canvas, int x, int y, boolean show) {
+        if (show) {
+            switch (treasure.getType()) {
+                case Treasure.TREASURE_TYPE_MONEY:
+                    mTreasureMoneyDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                    mTreasureMoneyDraw.draw(canvas);
+                    break;
+                case Treasure.TREASURE_TYPE_EYE:
+                    mTreasureEyeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                    mTreasureEyeDraw.draw(canvas);
+                    break;
+                case Treasure.TREASURE_TYPE_TIME:
+                    mTreasureTimeDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+                    mTreasureTimeDraw.draw(canvas);
+                    break;
+            }
+        } else {
+            mTreasureHideDraw.setBounds(x - 20, y - 20, x + 20, y + 20);
+            mTreasureHideDraw.draw(canvas);
         }
     }
 

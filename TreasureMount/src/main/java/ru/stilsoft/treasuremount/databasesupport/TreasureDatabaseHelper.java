@@ -24,6 +24,7 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
     protected static final String column_altitude = "altitude";
     protected static final String column_state = "state";
     protected static final String column_lastChangedTime = "lastChangedTime";
+    protected static final String column_showTreasure = "showTreasure";
 
     protected static final String column_count = "count";
     protected static final String column_type = "type";
@@ -38,6 +39,7 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 			column_longitude + " double, " +
 			column_altitude + " double, " +
 			column_state + " integer, " +
+            column_showTreasure + " integer, " +
 			column_lastChangedTime + " integer, " +
 
 			column_count + " integer, " +
@@ -50,6 +52,7 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 			column_longitude + " double, " +
 			column_altitude + " double, " +
 			column_state + " integer, " +
+            column_showTreasure + " integer, " +
 			column_lastChangedTime + " integer);";
 
     private static final String TABLE_STATISTICS_CREATE = "create table " + TABLE_NAME_STATISTICS + " (" +

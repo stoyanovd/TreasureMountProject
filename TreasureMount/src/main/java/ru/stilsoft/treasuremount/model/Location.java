@@ -28,6 +28,8 @@ public class Location implements IGeoPoint {
 
     private int longitudeE6;
 
+    private boolean showTreasure;
+
     public Location() {
     }
 
@@ -90,5 +92,13 @@ public class Location implements IGeoPoint {
 
     public void setLastChangedTime(long lastChangedTime) {
         this.lastChangedTime = lastChangedTime;
+    }
+
+    public boolean getShowTreasure() {
+        return showTreasure;
+    }
+
+    public void setShowTreasure(boolean showTreasure) {
+        this.showTreasure = showTreasure;
     }
 }

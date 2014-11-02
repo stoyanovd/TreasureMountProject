@@ -16,6 +16,7 @@ public class TreasureWrapper {
         contentValues.put(TreasureDatabaseHelper.column_longitude, treasure.getLongitude());
         contentValues.put(TreasureDatabaseHelper.column_altitude, treasure.getAltitude());
         contentValues.put(TreasureDatabaseHelper.column_state, treasure.getState());
+        contentValues.put(TreasureDatabaseHelper.column_showTreasure, treasure.getShowTreasure());
         contentValues.put(TreasureDatabaseHelper.column_lastChangedTime, treasure.getLastChangedTime());
 
 
@@ -34,6 +35,7 @@ public class TreasureWrapper {
         treasure.setLongitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_longitude));
         treasure.setAltitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_altitude));
         treasure.setState((int) (long) (contentValues.getAsLong(TreasureDatabaseHelper.column_state)));
+        treasure.setShowTreasure(contentValues.getAsBoolean(TreasureDatabaseHelper.column_showTreasure));
         treasure.setLastChangedTime(contentValues.getAsLong(TreasureDatabaseHelper.column_lastChangedTime));
 
         treasure.setCount(contentValues.getAsLong(TreasureDatabaseHelper.column_count));

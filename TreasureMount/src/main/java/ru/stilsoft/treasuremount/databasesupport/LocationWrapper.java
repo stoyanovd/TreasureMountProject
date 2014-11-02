@@ -16,6 +16,7 @@ public class LocationWrapper {
         contentValues.put(TreasureDatabaseHelper.column_longitude, location.getLongitude());
         contentValues.put(TreasureDatabaseHelper.column_altitude, location.getAltitude());
         contentValues.put(TreasureDatabaseHelper.column_state, location.getState());
+        contentValues.put(TreasureDatabaseHelper.column_showTreasure, location.getShowTreasure());
         contentValues.put(TreasureDatabaseHelper.column_lastChangedTime, location.getLastChangedTime());
 
         return contentValues;
@@ -29,6 +30,7 @@ public class LocationWrapper {
         location.setLongitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_longitude));
         location.setAltitude(contentValues.getAsDouble(TreasureDatabaseHelper.column_altitude));
         location.setState((int) (long) (contentValues.getAsLong(TreasureDatabaseHelper.column_state)));
+        location.setShowTreasure(contentValues.getAsBoolean(TreasureDatabaseHelper.column_showTreasure));
         location.setLastChangedTime(contentValues.getAsLong(TreasureDatabaseHelper.column_lastChangedTime));
 
         return location;
