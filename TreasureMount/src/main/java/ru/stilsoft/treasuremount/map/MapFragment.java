@@ -10,12 +10,12 @@ import org.osmdroid.tileprovider.modules.IArchiveFile;
 import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
 import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider;
 import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
-import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -37,10 +37,14 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import ru.stilsoft.treasuremount.R;
+import ru.stilsoft.treasuremount.model.Location;
+import ru.stilsoft.treasuremount.model.Treasure;
 import ru.stilsoft.treasuremount.samplefragments.BaseSampleFragment;
 import ru.stilsoft.treasuremount.samplefragments.SampleFactory;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Default map view activity.
@@ -74,6 +78,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	private ScaleBarOverlay mScaleBarOverlay;
     private RotationGestureOverlay mRotationGestureOverlay;
     private ResourceProxy mResourceProxy;
+
+    private List<Location> mLocations = new ArrayList<>();
+    private List<Treasure> mTreasures = new ArrayList<>();
+
+    ArrayList<OverlayItem> mOverlayItemArray = new ArrayList<>();
 
 	public static MapFragment newInstance() {
 		MapFragment fragment = new MapFragment();
@@ -139,8 +148,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
         this.mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context),
                 mMapView);
-        this.mLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context),
-                mMapView);
+        this.mLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context), mMapView);
+        this.mLocationOverlay.setDrawAccuracyEnabled(true);
 
         //mMinimapOverlay = new MinimapOverlay(context, mMapView.getTileRequestCompleteHandler());
 		//mMinimapOverlay.setWidth(dm.widthPixels / 5);
@@ -166,6 +175,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 		mLocationOverlay.enableMyLocation();
 		mCompassOverlay.enableCompass();
+
+
+        for (Location location : mLocations) {
+            mOverlayItemArray.add(new OverlayItem("", "Russia", new GeoPoint(location.getLatitude(), location.getLongitude())));
+        }
+
 
         setHasOptionsMenu(true);
     }

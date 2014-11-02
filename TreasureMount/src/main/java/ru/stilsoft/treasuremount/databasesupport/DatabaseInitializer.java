@@ -33,9 +33,8 @@ public class DatabaseInitializer {
 		sqLiteDatabase = treasureDatabaseHelper.getWritableDatabase();
 		//treasureDatabaseHelper.onlyDrop(sqLiteDatabase);
 
-		if (!isInitialized) {
-			checkInitialization();
-		}
+		checkInitialization();
+
 		if (!isInitialized) {
 			getMainLocationsAndGenerateTreasures(context);
 		}
@@ -53,15 +52,15 @@ public class DatabaseInitializer {
 	public static void checkInitialization() {
 		Cursor cursor = sqLiteDatabase.query(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null, null, null, null, null, null);
 		cursor.moveToFirst();
-		while (cursor.moveToNext()) {
+		if (cursor.getCount() > 0)
 			isInitialized = true;
-		}
 		cursor.close();
 	}
 
 	private static void getMainLocationsAndGenerateTreasures(Context context) {
-		Double[] read = readAnXML(context);
+		double[] read = readAnXML(context);
 		//Double[] read = {0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0};
+		/*
 		for (int i = 0; i < NUMBER_OF_MAIN_LOCATIONS; i++) {
 			if (read[i] == null) {
 				Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_SHORT).show();
@@ -72,6 +71,7 @@ public class DatabaseInitializer {
 				}
 			}
 		}
+		*/
 
 		long curTime = System.currentTimeMillis();
 
@@ -84,7 +84,7 @@ public class DatabaseInitializer {
 			location.setState(Location.LOCATION_STATE_NEW);
 			location.setAltitude(0.0);
 
-			sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
+			long rowid = sqLiteDatabase.insert(TreasureDatabaseHelper.TABLE_NAME_LOCATIONS, null,
 					LocationWrapper.getContentValues(location));
 
 			for (int j = 0; j < TreasureGenerator.NUMBER_OF_NEAREST_TREASURES_ON_LOCATION; j++) {
@@ -103,7 +103,7 @@ public class DatabaseInitializer {
 		isInitialized = true;
 	}
 
-	private static Double[] readAnXML(Context context) {
+	private static double[] readAnXML(Context context) {
 
 		try {
 			File file = new File(Environment.getExternalStorageDirectory(), "/TreasureMount/" + "main_locations.txt");
@@ -114,7 +114,7 @@ public class DatabaseInitializer {
 			while ((line = bufferedReader.readLine()) != null) {
 				for (int i = 0; i < line.length(); i++) {
 					char c = line.charAt(i);
-					if (c == ';' || (c >= '0' && c <= '9')) {
+					if (c == ';' || c == '.' || (c >= '0' && c <= '9')) {
 						text.append(c);
 					}
 				}
@@ -122,13 +122,13 @@ public class DatabaseInitializer {
 			//fileInputStream.close();
 			bufferedReader.close();
 			String[] doubles = text.toString().split(";");
-			Double[] ans = new Double[doubles.length];
-			for (int i = 0; i < doubles.length; i++) {
+			double[] ans = new double[doubles.length];
+			for (int i = 0; i < doubles.length; ++i) {
 				ans[i] = Double.parseDouble(doubles[i]);
 			}
 			return ans;
 
-		} catch (IOException | NumberFormatException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			Log.e("readXML error", e.getMessage(), e);
 			Toast.makeText(context, R.string.xml_file_not_found_exception, Toast.LENGTH_LONG).show();

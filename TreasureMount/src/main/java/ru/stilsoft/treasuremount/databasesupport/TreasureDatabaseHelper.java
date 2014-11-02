@@ -29,8 +29,8 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
     protected static final String column_treasureId = "treasureId";
 
 
-	private static final String TABLE_TREASURES_CREATE = "create table " + TABLE_NAME_TREASURES + "( " +
-			column_id + " integer primary key, " +
+	private static final String TABLE_TREASURES_CREATE = "create table " + TABLE_NAME_TREASURES + " (" +
+			column_id + " integer primary key autoincrement, " +
 			column_latitude + " double, " +
 			column_longitude + " double, " +
 			column_altitude + " double, " +
@@ -41,8 +41,8 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 			column_type + " integer, " +
 			column_treasureId + " integer);";
 
-    private static final String TABLE_LOCATIONS_CREATE = "create table " + TABLE_NAME_LOCATIONS + "( " +
-			column_id + " integer primary key, " +
+    private static final String TABLE_LOCATIONS_CREATE = "create table " + TABLE_NAME_LOCATIONS + " (" +
+			column_id + " integer primary key autoincrement, " +
 			column_latitude + " double, " +
 			column_longitude + " double, " +
 			column_altitude + " double, " +
@@ -61,8 +61,8 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	public void onlyDrop(SQLiteDatabase database) {
-		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LOCATIONS);
-		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TREASURES);
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LOCATIONS);
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TREASURES);
 	}
 
     @Override
