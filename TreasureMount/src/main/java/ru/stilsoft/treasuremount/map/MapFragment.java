@@ -3,10 +3,17 @@ package ru.stilsoft.treasuremount.map;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.os.Environment;
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.tileprovider.MapTileProviderArray;
+import org.osmdroid.tileprovider.modules.IArchiveFile;
+import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
+import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider;
+import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -32,6 +39,8 @@ import android.view.ViewGroup;
 import ru.stilsoft.treasuremount.R;
 import ru.stilsoft.treasuremount.samplefragments.BaseSampleFragment;
 import ru.stilsoft.treasuremount.samplefragments.SampleFactory;
+
+import java.io.File;
 
 /**
  * Default map view activity.
@@ -81,17 +90,27 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
-        mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
+
 
 		String[] urls = {"http://127.0.0.1"};
-		XYTileSource ts = new XYTileSource( "stavropol",
-				ResourceProxy.string.mapnik,
-				12,
-				17,
+		XYTileSource MBTILESRENDER = new XYTileSource("mbtiles",
+				ResourceProxy.string.offline_mode,
+				11,
+				15,
 				256,
-				".jpg",
+				".png",
 				urls);
-		mMapView.setTileSource(ts);
+
+        File f = new File(Environment.getExternalStorageDirectory(), "/TreasureMount/" + "map.mbtiles");
+
+        IArchiveFile[] mapFiles = new IArchiveFile[] { MBTilesFileArchive.getDatabaseFileArchive(f) };
+
+        SimpleRegisterReceiver simpleReceiver = new SimpleRegisterReceiver(inflater.getContext());
+        MapTileModuleProviderBase moduleProvider = new MapTileFileArchiveProvider(simpleReceiver, MBTILESRENDER, mapFiles);
+        MapTileProviderArray provider = new MapTileProviderArray(MBTILESRENDER, null, new MapTileModuleProviderBase[] { moduleProvider });
+
+        mMapView = new MapView(inflater.getContext(), 256, mResourceProxy, provider);
+		mMapView.setTileSource(MBTILESRENDER);
 		mMapView.setUseDataConnection(false);
 
 		// Call this method to turn off hardware acceleration at the View level.
@@ -123,9 +142,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         this.mLocationOverlay = new MyLocationNewOverlay(context, new GpsMyLocationProvider(context),
                 mMapView);
 
-        mMinimapOverlay = new MinimapOverlay(context, mMapView.getTileRequestCompleteHandler());
-		mMinimapOverlay.setWidth(dm.widthPixels / 5);
-		mMinimapOverlay.setHeight(dm.heightPixels / 5);
+        //mMinimapOverlay = new MinimapOverlay(context, mMapView.getTileRequestCompleteHandler());
+		//mMinimapOverlay.setWidth(dm.widthPixels / 5);
+		//mMinimapOverlay.setHeight(dm.heightPixels / 5);
 
 		mScaleBarOverlay = new ScaleBarOverlay(context);
 		mScaleBarOverlay.setCentred(true);
@@ -138,11 +157,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mMapView.setMultiTouchControls(true);
         mMapView.getOverlays().add(this.mLocationOverlay);
         mMapView.getOverlays().add(this.mCompassOverlay);
-        mMapView.getOverlays().add(this.mMinimapOverlay);
+        //mMapView.getOverlays().add(this.mMinimapOverlay);
 		mMapView.getOverlays().add(this.mScaleBarOverlay);
         mMapView.getOverlays().add(this.mRotationGestureOverlay);
 
-        mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 1));
+        mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 13));
         mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
 
 		mLocationOverlay.enableMyLocation();
@@ -192,6 +211,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         }
     }
 
+    /*
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
@@ -218,8 +238,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         menu.add(0, MENU_ABOUT, Menu.CATEGORY_SECONDARY, R.string.about).setIcon(
                 android.R.drawable.ic_menu_info_details);
 
-        super.onCreateOptionsMenu(menu, inflater);
+       super.onCreateOptionsMenu(menu, inflater);
     }
+    */
 
 	protected void startSampleFragment(Fragment fragment) {
 		FragmentManager fm = getFragmentManager();
@@ -227,12 +248,14 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 				.addToBackStack(null).commit();
 	}
 
+    /*
     @Override
     public void onPrepareOptionsMenu(final Menu pMenu)
     {
         mMapView.getOverlayManager().onPrepareOptionsMenu(pMenu, MENU_LAST_ID, mMapView);
         super.onPrepareOptionsMenu(pMenu);
     }
+    */
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
