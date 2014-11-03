@@ -9,6 +9,8 @@
 
     <string name="text_map">Карта</string>
     <string name="text_exit">Выход</string>
+    <string name="text_in_location">Вход в локацию</string>
+    <string name="text_warning">Внимание</string>
 
     <string name="unknown">Unknown</string>
     <string name="map_mode">Map mode</string>

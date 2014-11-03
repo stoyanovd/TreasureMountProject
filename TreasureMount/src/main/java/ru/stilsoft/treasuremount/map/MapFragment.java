@@ -1,13 +1,16 @@
 // Created by plusminus on 00:23:14 - 03.10.2008
 package ru.stilsoft.treasuremount.map;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.widget.Toast;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.modules.IArchiveFile;
@@ -129,6 +132,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
+
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
 
 
@@ -155,6 +159,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 		// Call this method to turn off hardware acceleration at the View level.
         // setHardwareAccelerationOff();
+
         return mMapView;
     }
 
@@ -243,9 +248,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                     mapview.getProjection().toPixels(in, out);
 
                     Location location = mAllObjects.get(i);
-                    if (location instanceof Treasure && location.getState() == Location.LOCATION_STATE_OPEN) {
-						Location mainLocation = mLocationMap.get(((Treasure) location).getTreasureId());
-						drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
+                    if (location instanceof Treasure) {
+                        if (location.getState() == Location.LOCATION_STATE_OPEN) {
+                            Location mainLocation = mLocationMap.get(((Treasure) location).getTreasureId());
+                            drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
+                        }
                     } else {
                         drawObject(location, canvas, out.x, out.y);
                     }
@@ -313,6 +320,24 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                             } finally {
                                 sqLiteDatabase.endTransaction();
                             }
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                    builder.setMessage(R.string.text_in_location)
+                                            .setTitle(R.string.text_warning)
+                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    dialogInterface.dismiss();
+                                                }
+                                            });
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                }
+                            });
+
                         }
 
                         if (location.getState() == Location.LOCATION_STATE_OPEN) {
@@ -321,20 +346,47 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                                     try {
                                         sqLiteDatabase.beginTransaction();
                                         updateMapView = true;
+                                        String text = "";
                                         switch (treasure.getType()) {
                                             case Treasure.TREASURE_TYPE_TIME:
                                                 location.setLastChangedTime(location.getLastChangedTime() + treasure.getCount() * 60000);
                                                 DatabaseSupporter.updateMainLocationInDatabase(location);
+                                                text = "Вы нашли время: " + treasure.getCount();
+                                                //Toast.makeText(getActivity(), "Вы нашли время: " + treasure.getCount(), Toast.LENGTH_LONG).show();
                                                 break;
                                             case Treasure.TREASURE_TYPE_EYE:
                                                 location.setShowTreasure(true);
                                                 DatabaseSupporter.updateMainLocationInDatabase(location);
+                                                text = "Вы нашли карту сокровищ";
+                                                //Toast.makeText(getActivity(), "Вы нашли карту сокровищ", Toast.LENGTH_LONG).show();
                                                 break;
                                             case Treasure.TREASURE_TYPE_MONEY:
                                                 statistics.setMoney(statistics.getMoney() + treasure.getCount());
                                                 DatabaseSupporter.updateStatisticsInDatabase(statistics);
+                                                text = "Вы нашли деньги: " + treasure.getCount();
+                                                //Toast.makeText(getActivity(), "Вы нашли деньги: " + treasure.getCount(), Toast.LENGTH_LONG).show();
                                                 break;
                                         }
+
+                                        final String finalText = text;
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                builder.setMessage(finalText)
+                                                        .setTitle(R.string.text_warning)
+                                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                                dialogInterface.dismiss();
+                                                            }
+                                                        });
+                                                AlertDialog dialog = builder.create();
+                                                dialog.show();
+                                            }
+                                        });
+
+
                                         treasure.setState(Location.LOCATION_STATE_FINISHED);
                                         DatabaseSupporter.updateTreasureInDatabase(treasure);
                                         sqLiteDatabase.setTransactionSuccessful();
