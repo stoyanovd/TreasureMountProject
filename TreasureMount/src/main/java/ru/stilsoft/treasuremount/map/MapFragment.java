@@ -1,8 +1,10 @@
 // Created by plusminus on 00:23:14 - 03.10.2008
 package ru.stilsoft.treasuremount.map;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -129,6 +131,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
+
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
 
 
@@ -155,6 +158,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 		// Call this method to turn off hardware acceleration at the View level.
         // setHardwareAccelerationOff();
+
         return mMapView;
     }
 
@@ -243,9 +247,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                     mapview.getProjection().toPixels(in, out);
 
                     Location location = mAllObjects.get(i);
-                    if (location instanceof Treasure && location.getState() == Location.LOCATION_STATE_OPEN) {
-                        Location mainLocation = mLocationMap.get(location.getId());
-                        drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
+                    if (location instanceof Treasure) {
+                        if (location.getState() == Location.LOCATION_STATE_OPEN) {
+                            Location mainLocation = mLocationMap.get(((Treasure) location).getTreasureId());
+                            drawObject((Treasure) location, canvas, out.x, out.y, mainLocation.getShowTreasure());
+                        }
                     } else {
                         drawObject(location, canvas, out.x, out.y);
                     }
@@ -313,6 +319,24 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                             } finally {
                                 sqLiteDatabase.endTransaction();
                             }
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                    builder.setMessage(R.string.text_in_location)
+                                            .setTitle(R.string.text_warning)
+                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    dialogInterface.dismiss();
+                                                }
+                                            });
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                }
+                            });
+
                         }
 
                         if (location.getState() == Location.LOCATION_STATE_OPEN) {
