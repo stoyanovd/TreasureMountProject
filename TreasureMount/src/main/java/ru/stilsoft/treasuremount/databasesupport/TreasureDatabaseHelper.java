@@ -16,7 +16,7 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_NAME_TREASURES = "treasures_table";
     public static final String TABLE_NAME_STATISTICS = "statistics_table";
 
-    private static final int DATABASE_VERSION = 1;
+	private static int DATABASE_VERSION = 1;
 
 	protected static final String column_id = "_id";
 	protected static final String column_latitude = "latitude";
@@ -87,4 +87,9 @@ public class TreasureDatabaseHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_STATISTICS);
 		onCreate(database);
     }
+
+	public static void rebuild() {
+		DatabaseInitializer.treasureDatabaseHelper.onUpgrade(DatabaseInitializer.sqLiteDatabase, DATABASE_VERSION, DATABASE_VERSION + 1);
+		DATABASE_VERSION++;
+	}
 }

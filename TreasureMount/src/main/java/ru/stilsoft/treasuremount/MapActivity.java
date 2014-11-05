@@ -7,6 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.widget.ViewAnimator;
+import android.widget.ViewFlipper;
+import android.widget.ViewSwitcher;
 import ru.stilsoft.treasuremount.databasesupport.DatabaseSupporter;
 import ru.stilsoft.treasuremount.map.MapFragment;
 import ru.stilsoft.treasuremount.model.Statistics;
@@ -16,6 +19,8 @@ public class MapActivity extends Activity {
 
     private static final int DIALOG_ABOUT_ID = 1;
     private static final String MAP_FRAGMENT_TAG = "org.osmdroid.MAP_FRAGMENT_TAG";
+
+	private static int CUR_MODE = 0;
 
     public MapActivity() {
     }
@@ -55,7 +60,12 @@ public class MapActivity extends Activity {
             Statistics statistics = DatabaseSupporter.getStatistics();
             Toast.makeText(this, "Деньги: " + statistics.getMoney(), Toast.LENGTH_LONG).show();
             return true;
-        }
-        return super.onOptionsItemSelected(item);
+        } else if (id == R.id.action_change_to_treasures) {
+			ViewAnimator viewAnimator = (ViewAnimator) findViewById(R.id.viewAnimator);
+			viewAnimator.showNext();
+			Toast.makeText(this, "Mode changed to: " + (CUR_MODE == 1 ? "Treasures" : "Map"), Toast.LENGTH_SHORT);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
     }
 }

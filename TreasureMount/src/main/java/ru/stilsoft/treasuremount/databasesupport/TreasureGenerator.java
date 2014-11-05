@@ -51,6 +51,8 @@ public class TreasureGenerator {
 		treasure.setType(getRandomType());
 		if (treasure.getType() == Treasure.TREASURE_TYPE_MONEY) {
 			treasure.setCount(getRandomMoney());
+		} else if (treasure.getType() == Treasure.TREASURE_TYPE_TIME) {
+			treasure.setCount(2);
 		}
 
 		treasure.setTreasureId(location.getId());

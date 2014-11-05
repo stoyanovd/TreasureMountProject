@@ -6,7 +6,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
@@ -61,8 +63,8 @@ import java.util.concurrent.TimeUnit;
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
     public static final int LOCATION_OPEN_TIMEOUT = 15; // min
-    public static final int LOCATION_OPEN_RADIUS = 10; // m
-    public static final int TREASURE_OPEN_RADIUS = 5; // m
+	public static final int LOCATION_OPEN_RADIUS = 50; // m
+	public static final int TREASURE_OPEN_RADIUS = 10; // m
 
     // ===========================================================
     // Constants
@@ -308,13 +310,35 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
                                 location.setLastChangedTime(System.currentTimeMillis());
                                 DatabaseSupporter.updateMainLocationInDatabase(location);
 
+								GeoPoint thisLocation = new GeoPoint(location.getLatitudeE6(), location.getLongitudeE6());
+
+								int[][] x = new int[200][200];
+								for (int i = 0; i < 200; i++) {
+									for (int j = 0; j < 200; j++) {
+										x[i][j] = 0;
+									}
+								}
+
+
                                 List<Treasure> treasures = treasureMap.get(location);
                                 for (Treasure treasure : treasures) {
                                     if (treasure.getState() == Treasure.LOCATION_STATE_NEW) {
                                         treasure.setState(Treasure.LOCATION_STATE_OPEN);
                                         DatabaseSupporter.updateTreasureInDatabase(treasure);
-                                    }
-                                }
+										GeoPoint tr = new GeoPoint(treasure.getLatitudeE6(), treasure.getLongitudeE6());
+										int xt = (int) (tr.distanceTo(thisLocation) * Math.cos(tr.bearingTo(thisLocation)) + 100);
+										int xt = tr.distanceTo(thisLocation) / 100.0 * Math.cos(tr.bearingTo(thisLocation)) + 100;
+										int yt = (int) (tr.distanceTo(thisLocation) * Math.sin(tr.bearingTo(thisLocation)) + 100);
+										for (int tpx = xt - 1; tpx < xt + 2; tpx++) {
+											for (int tpy = yt - 1; tpy < yt + 2; tpy++) {
+												if (tpx >= 0 && tpx < 200 && tpy >= 0 && tpy < 200) {
+													x[tpx][tpy] = Color.YELLOW;
+												}
+											}
+										}
+
+									}
+								}
 
                                 sqLiteDatabase.setTransactionSuccessful();
                             } finally {

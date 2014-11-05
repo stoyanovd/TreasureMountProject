@@ -6,6 +6,7 @@
     <string name="action_settings">Настройки</string>
     <string name="action_clean_config">Очистить конфигурацию</string>
     <string name="action_statistics">Статистика</string>
+    <string name="action_change_to_treasures">Поменять мод</string>
 
     <string name="text_map">Карта</string>
     <string name="text_exit">Выход</string>

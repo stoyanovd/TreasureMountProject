@@ -112,6 +112,10 @@ public class DatabaseInitializer {
 
 		try {
 			File file = new File(Environment.getExternalStorageDirectory(), "/TreasureMount/" + "main_locations.txt");
+			//File file = new File("/TreasureMount/main_locations.txt");
+			if (!file.exists()) {
+				System.out.println();
+			}
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 			//FileInputStream fileInputStream = context.openFileInput("main_locations.txt");
 			StringBuilder text = new StringBuilder();
